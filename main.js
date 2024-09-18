@@ -1,7 +1,22 @@
 import './style.css'
 import * as Tone from "tone";
+import getNoteFromKey from './noteUtils';
+//const synth = new Tone.Synth().toDestination();
+const synth = new Tone.Sampler({
+	urls: {
+		C4: "C4.mp3",
+		"D#4": "Ds4.mp3",
+		"F#4": "Fs4.mp3",
+		A4: "A4.mp3",
+	},
+	release: 1,
+	baseUrl: "https://tonejs.github.io/audio/salamander/",
+}).toDestination();
 
-const synth = new Tone.Synth().toDestination();
+Tone.loaded().then(() => {
+	sampler.triggerAttackRelease(["Eb4", "G4", "Bb4"], 4);
+});
+
 
 document.querySelector("[data-note='C4']").addEventListener("click", () => playNote("C4"))
 
@@ -9,10 +24,25 @@ let keys = document.querySelectorAll('.key')
 
 for (let key of keys) {
     let noteToPlay = key.getAttribute('data-note')
-    key.addEventListener('click', () => playNote(noteToPlay))
+    key.addEventListener('mousedown', () => playNote(noteToPlay))
+    key.addEventListener('mouseup', stopNote)
+    key.addEventListener('mouseleave', stopNote)
+}
+
+document.addEventListener('keypress', ctrlTeclado)
+document.addEventListener('keyup', stopNote)
+
+function ctrlTeclado(event) {
+    let keyName = event.key
+    let note = getNoteFromKey(keyName)
+    playNote[note]
+}
+
+function playNote(note) {
+    synth.triggerAttackRelease(note);
 }
 
 
-function playNote(note) {
-    synth.triggerAttackRelease(note, "8n");
+function stopNote() {
+    synth.triggerRelease();
 }
